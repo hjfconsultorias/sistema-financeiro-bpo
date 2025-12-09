@@ -1,0 +1,17 @@
+{
+  "name": "sistema-financeiro-bpo",
+  "domain": "bpoekgps.manus.space",
+  "github": {
+    "repository": "hjfconsultorias/sistema-financeiro-bpo",
+    "branch": "main",
+    "auto_deploy": true
+  },
+  "build": {
+    "command": "pnpm build",
+    "output_directory": "dist"
+  },
+  "database": {
+    "type": "mysql",
+    "name": "sistema_financeiro_bpo"
+  }
+}
