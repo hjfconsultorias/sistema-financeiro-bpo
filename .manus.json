@@ -1,0 +1,30 @@
+{
+  "name": "sistema-financeiro-bpo",
+  "displayName": "Sistema Financeiro EK-Empreendimento",
+  "version": "1.0.0",
+  "description": "Sistema de gestão financeira para empreendimentos de entretenimento infantil",
+  "domain": "bpoekgps.manus.space",
+  "type": "web-db-user",
+  "features": {
+    "database": true,
+    "authentication": true,
+    "api": true
+  },
+  "environment": "production",
+  "buildCommand": "pnpm build",
+  "startCommand": "pnpm start",
+  "ports": {
+    "app": 3000,
+    "api": 3001
+  },
+  "database": {
+    "type": "mysql",
+    "version": "8.0",
+    "name": "sistema_financeiro_bpo"
+  },
+  "backup": {
+    "enabled": true,
+    "frequency": "daily",
+    "retention": 30
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1764644001920,
+      "tag": "0000_tiny_trauma",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1764644084729,
+      "tag": "0001_late_gambit",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1764646426209,
+      "tag": "0002_warm_magus",
+      "breakpoints": true
+    }
+  ]
+}

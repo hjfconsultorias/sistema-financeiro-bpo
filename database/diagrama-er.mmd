@@ -1,0 +1,156 @@
+erDiagram
+    %% BPO EK - Sistema Financeiro v1.0
+    %% Diagrama Entidade-Relacionamento
+    
+    SYSTEM_USERS ||--o{ USER_MODULE_PERMISSIONS : "tem"
+    MODULES ||--o{ USER_MODULE_PERMISSIONS : "possui"
+    
+    COMPANIES ||--o{ COST_CENTERS : "possui"
+    COMPANIES ||--o{ ACCOUNTS_PAYABLE : "possui"
+    COMPANIES ||--o{ ACCOUNTS_RECEIVABLE : "possui"
+    COMPANIES ||--o{ DAILY_REVENUES : "possui"
+    
+    COST_CENTERS ||--o{ ACCOUNTS_PAYABLE : "associado"
+    COST_CENTERS ||--o{ ACCOUNTS_RECEIVABLE : "associado"
+    COST_CENTERS ||--o{ DAILY_REVENUES : "associado"
+    
+    CLIENTS ||--o{ ACCOUNTS_RECEIVABLE : "deve"
+    CLIENTS ||--o{ DAILY_REVENUES : "gera"
+    
+    SUPPLIERS ||--o{ ACCOUNTS_PAYABLE : "recebe"
+    
+    CATEGORIES ||--o{ ACCOUNTS_PAYABLE : "classifica"
+    CATEGORIES ||--o{ ACCOUNTS_RECEIVABLE : "classifica"
+    CATEGORIES ||--o{ DAILY_REVENUES : "classifica"
+    
+    SYSTEM_USERS {
+        int id PK
+        string email UK
+        string password_hash
+        string name
+        enum profile "admin, user, viewer"
+        datetime created_at
+        datetime updated_at
+    }
+    
+    MODULES {
+        int id PK
+        string name UK
+        string description
+        string icon
+        boolean is_active
+        int display_order
+        datetime created_at
+    }
+    
+    USER_MODULE_PERMISSIONS {
+        int id PK
+        int user_id FK
+        int module_id FK
+        boolean can_view
+        boolean can_create
+        boolean can_edit
+        boolean can_delete
+        boolean can_approve
+        boolean can_export
+        datetime created_at
+    }
+    
+    COMPANIES {
+        int id PK
+        string name
+        string cnpj UK
+        string email
+        string phone
+        string address
+        datetime created_at
+        datetime updated_at
+    }
+    
+    COST_CENTERS {
+        int id PK
+        int company_id FK
+        string name
+        string code UK
+        string description
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+    
+    CLIENTS {
+        int id PK
+        string name
+        string cnpj UK
+        string email
+        string phone
+        string address
+        datetime created_at
+        datetime updated_at
+    }
+    
+    SUPPLIERS {
+        int id PK
+        string name
+        string cnpj UK
+        string email
+        string phone
+        string address
+        datetime created_at
+        datetime updated_at
+    }
+    
+    CATEGORIES {
+        int id PK
+        string name UK
+        string description
+        enum type "receita, despesa"
+        datetime created_at
+        datetime updated_at
+    }
+    
+    ACCOUNTS_PAYABLE {
+        int id PK
+        int company_id FK
+        int cost_center_id FK
+        int supplier_id FK
+        int category_id FK
+        string description
+        decimal amount
+        date due_date
+        date payment_date
+        enum status "pendente, pago, vencido"
+        string notes
+        datetime created_at
+        datetime updated_at
+    }
+    
+    ACCOUNTS_RECEIVABLE {
+        int id PK
+        int company_id FK
+        int cost_center_id FK
+        int client_id FK
+        int category_id FK
+        string description
+        decimal amount
+        date due_date
+        date receipt_date
+        enum status "pendente, recebido, vencido"
+        string notes
+        datetime created_at
+        datetime updated_at
+    }
+    
+    DAILY_REVENUES {
+        int id PK
+        int company_id FK
+        int cost_center_id FK
+        int client_id FK
+        int category_id FK
+        date revenue_date
+        decimal amount
+        string description
+        string notes
+        datetime created_at
+        datetime updated_at
+    }
