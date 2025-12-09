@@ -61,7 +61,7 @@ export default function ModuleSelector() {
         </div>
 
         {/* Grid de Módulos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {modules?.map((module) => {
             const Icon = iconMap[module.icon || 'Building2'] || Building2;
             const isAvailable = module.available === 1;
@@ -72,7 +72,7 @@ export default function ModuleSelector() {
                 onClick={() => handleModuleClick(module)}
                 className={`
                   group relative overflow-hidden
-                  rounded-3xl p-8
+                  rounded-2xl p-5
                   transition-all duration-300
                   ${
                     isAvailable
@@ -90,7 +90,7 @@ export default function ModuleSelector() {
                 <div className="relative z-10 flex flex-col items-center text-center space-y-4">
                   {/* Ícone */}
                   <div className="relative">
-                    <Icon className="w-12 h-12 text-white" />
+                    <Icon className="w-9 h-9 text-white" />
                     {!isAvailable && (
                       <div className="absolute -top-1 -right-1 bg-slate-600 rounded-full p-1">
                         <Lock className="w-4 h-4 text-white" />
@@ -99,7 +99,7 @@ export default function ModuleSelector() {
                   </div>
 
                   {/* Título */}
-                  <h3 className="text-white font-bold text-lg leading-tight">
+                  <h3 className="text-white font-bold text-sm leading-tight">
                     {module.displayName}
                   </h3>
 
@@ -124,10 +124,7 @@ export default function ModuleSelector() {
           })}
         </div>
 
-        {/* Footer */}
-        <div className="mt-12 text-center text-sm text-slate-500 dark:text-slate-400">
-          <p>Business Process Outsourcing • Gestão Integrada de Processos</p>
-        </div>
+
       </div>
     </div>
   );
