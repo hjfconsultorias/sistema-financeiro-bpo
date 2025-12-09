@@ -1,0 +1,48 @@
+{
+  "name": "sistema-financeiro-bpo",
+  "displayName": "Sistema Financeiro EK-Empreendimento",
+  "version": "1.0.0",
+  "description": "Sistema de gestão financeira para empreendimentos de entretenimento infantil",
+  "type": "web-db-user",
+  "domain": "bpoekgps.manus.space",
+  "buildCommand": "pnpm build",
+  "startCommand": "pnpm start",
+  "postBuildCommand": "pnpm db:push",
+  "environment": "production",
+  "features": {
+    "database": true,
+    "authentication": true,
+    "api": true,
+    "backup": true
+  },
+  "database": {
+    "type": "mysql",
+    "version": "8.0",
+    "name": "sistema_financeiro_bpo",
+    "migrations": [
+      "drizzle/0000_tiny_trauma.sql",
+      "drizzle/0001_late_gambit.sql",
+      "drizzle/0002_warm_magus.sql",
+      "drizzle/0003_add_agenda_table.sql"
+    ]
+  },
+  "backup": {
+    "enabled": true,
+    "frequency": "daily",
+    "retention": 30,
+    "time": "23:50"
+  },
+  "healthCheck": {
+    "enabled": true,
+    "path": "/api/health",
+    "interval": 300
+  },
+  "monitoring": {
+    "enabled": true,
+    "alerts": {
+      "uptime": true,
+      "performance": true,
+      "errors": true
+    }
+  }
+}
