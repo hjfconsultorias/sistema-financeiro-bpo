@@ -1,0 +1,24 @@
+{
+  "webhooks": [
+    {
+      "name": "GitHub Push to Manus Deploy",
+      "event": "push",
+      "branch": "main",
+      "actions": [
+        {
+          "type": "build",
+          "command": "pnpm build"
+        },
+        {
+          "type": "database",
+          "command": "pnpm db:push"
+        },
+        {
+          "type": "deploy",
+          "target": "production",
+          "domain": "bpoekgps.manus.space"
+        }
+      ]
+    }
+  ]
+}
