@@ -72,7 +72,7 @@ export default function ModuleSelector() {
                 onClick={() => handleModuleClick(module)}
                 className={`
                   group relative overflow-hidden
-                  rounded-2xl p-5
+                  rounded-2xl p-3.5
                   transition-all duration-300
                   ${
                     isAvailable
@@ -90,7 +90,7 @@ export default function ModuleSelector() {
                 <div className="relative z-10 flex flex-col items-center text-center space-y-4">
                   {/* Ícone */}
                   <div className="relative">
-                    <Icon className="w-9 h-9 text-white" />
+                    <Icon className="w-7 h-7 text-white" />
                     {!isAvailable && (
                       <div className="absolute -top-1 -right-1 bg-slate-600 rounded-full p-1">
                         <Lock className="w-4 h-4 text-white" />
@@ -99,7 +99,7 @@ export default function ModuleSelector() {
                   </div>
 
                   {/* Título */}
-                  <h3 className="text-white font-bold text-sm leading-tight">
+                  <h3 className="text-white font-bold text-xs leading-tight">
                     {module.displayName}
                   </h3>
 
