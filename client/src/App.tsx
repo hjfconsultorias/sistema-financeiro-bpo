@@ -16,6 +16,7 @@ import DailyRevenuesReport from "./pages/DailyRevenuesReport";
 import ReportsHub from "./pages/ReportsHub";
 import SystemUsers from "./pages/SystemUsers";
 import Categories from "./pages/Categories";
+import Agenda from "./pages/Agenda";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Reports from "./pages/Reports";
@@ -70,6 +71,9 @@ function Router() {
       </Route>
       <Route path="/categorias">
         {() => <ProtectedRoute><Categories /></ProtectedRoute>}
+      </Route>
+      <Route path="/modules/agenda">
+        {() => <ProtectedRoute><Agenda /></ProtectedRoute>}
       </Route>
       <Route path="/relatorios">
         {() => <ProtectedRoute><Reports /></ProtectedRoute>}
