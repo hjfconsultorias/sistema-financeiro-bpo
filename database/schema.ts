@@ -351,3 +351,35 @@ export const userModulePermissions = mysqlTable("user_module_permissions", {
 
 export type UserModulePermission = typeof userModulePermissions.$inferSelect;
 export type InsertUserModulePermission = typeof userModulePermissions.$inferInsert;
+
+/**
+ * Tabela AGENDA - Gestão de eventos por empresa e centro de custo
+ * Módulo: AGENDA
+ */
+export const agenda = mysqlTable("agenda", {
+  id: varchar("id", { length: 191 }).primaryKey(),
+  companyId: varchar("company_id", { length: 191 }).notNull(),
+  costCenterId: varchar("cost_center_id", { length: 191 }).notNull(),
+  year: int("year").notNull(),
+  period: varchar("period", { length: 191 }).notNull(),
+  status: varchar("status", { length: 191 }).notNull(),
+  shopping: varchar("shopping", { length: 191 }),
+  state: varchar("state", { length: 191 }),
+  network: varchar("network", { length: 191 }),
+  classification: varchar("classification", { length: 191 }),
+  rent: decimal("rent", { precision: 10, scale: 2 }),
+  notes: text("notes"),
+  isActive: int("is_active").default(1).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  uniqueEntry: uniqueIndex("unique_agenda_entry").on(table.companyId, table.costCenterId, table.year, table.period),
+  companyIdx: index("idx_agenda_company").on(table.companyId),
+  costCenterIdx: index("idx_agenda_cost_center").on(table.costCenterId),
+  yearIdx: index("idx_agenda_year").on(table.year),
+  statusIdx: index("idx_agenda_status").on(table.status),
+  activeIdx: index("idx_agenda_active").on(table.isActive),
+}));
+
+export type Agenda = typeof agenda.$inferSelect;
+export type InsertAgenda = typeof agenda.$inferInsert;
