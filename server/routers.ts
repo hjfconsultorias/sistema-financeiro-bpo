@@ -5,6 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
 import * as dbAgenda from "./db_agenda";
+import { getAvailableCompanies } from "./db_agenda_list_companies";
 import { TRPCError } from "@trpc/server";
 import * as auth from "./authorization";
 import * as captcha from "./captcha";
@@ -1666,8 +1667,16 @@ export const appRouter = router({
           const lineNumber = i + 2; // +2 porque linha 1 é cabeçalho
 
           try {
-            // 1. Converter EMPRESA para company_id
-            let companyId = record.EMPRESA.toLowerCase().replace(/\s+/g, "");
+            // 1. Buscar empresa pelo nome fantasia
+            const company = await dbAgenda.findCompanyByName(record.EMPRESA);
+            if (!company) {
+              results.errors.push({
+                line: lineNumber,
+                error: `Empresa "${record.EMPRESA}" não encontrada. Empresas disponíveis: ${await getAvailableCompanies()}`,
+                data: record,
+              });
+              continue;
+            }
             
             // 2. Buscar evento pelo nome
             const event = await dbAgenda.findEventByName(record.EVENTO);
@@ -1695,7 +1704,7 @@ export const appRouter = router({
 
             // 4. Criar registro
             await dbAgenda.createAgenda({
-              company_id: companyId,
+              company_id: company.id,
               event_id: event.id,
               year: record.ANO,
               period: record.PERIODO,
