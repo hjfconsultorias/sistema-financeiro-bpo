@@ -3,11 +3,13 @@ import { mysqlTable, varchar, int, decimal, text, boolean, timestamp } from "dri
 /**
  * Tabela AGENDA - Agendamento de eventos em shoppings
  * Armazena informações sobre quando e onde cada evento será realizado
+ * 
+ * CORREÇÃO: Alterado de cost_center_id para event_id para referenciar corretamente a tabela events
  */
 export const agenda = mysqlTable("agenda", {
   id: varchar("id", { length: 191 }).primaryKey().notNull(),
-  company_id: varchar("company_id", { length: 191 }).notNull(), // FK para companies (gp1, gp2, etc)
-  cost_center_id: varchar("cost_center_id", { length: 191 }).notNull(), // FK para cost_centers (cc24, cc25, etc)
+  company_id: varchar("company_id", { length: 191 }).notNull(), // FK para companies
+  event_id: int("event_id").notNull(), // FK para events (CORRIGIDO de cost_center_id)
   year: int("year").notNull(), // Ano (2026)
   period: varchar("period", { length: 191 }).notNull(), // Período (Janeiro a Fevereiro, etc)
   status: varchar("status", { length: 191 }).notNull(), // Status (Fase de Contrato, LIBERADO, etc)
