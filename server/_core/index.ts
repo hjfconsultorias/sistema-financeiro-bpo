@@ -35,6 +35,68 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
+  // Admin route for database backup
+  app.get('/api/admin/backup-database', async (req, res) => {
+    try {
+      const { getDb } = await import('../db');
+      const db = getDb();
+      
+      // Get all table names
+      const tables = await db.execute({ sql: 'SHOW TABLES' });
+      
+      let sqlDump = `-- Database Backup\n`;
+      sqlDump += `-- Date: ${new Date().toISOString()}\n`;
+      sqlDump += `-- System: Sistema Financeiro EK-BPO\n\n`;
+      
+      // For each table, get structure and data
+      for (const tableRow of tables.rows) {
+        const tableName = Object.values(tableRow)[0] as string;
+        
+        // Get CREATE TABLE statement
+        const createTable = await db.execute({ 
+          sql: `SHOW CREATE TABLE \`${tableName}\`` 
+        });
+        const createStatement = (createTable.rows[0] as any)['Create Table'];
+        
+        sqlDump += `-- Table: ${tableName}\n`;
+        sqlDump += `DROP TABLE IF EXISTS \`${tableName}\`;\n`;
+        sqlDump += `${createStatement};\n\n`;
+        
+        // Get table data
+        const data = await db.execute({ 
+          sql: `SELECT * FROM \`${tableName}\`` 
+        });
+        
+        if (data.rows && data.rows.length > 0) {
+          sqlDump += `-- Data for table ${tableName}\n`;
+          
+          for (const row of data.rows) {
+            const columns = Object.keys(row).map(k => `\`${k}\``).join(', ');
+            const values = Object.values(row).map(v => {
+              if (v === null) return 'NULL';
+              if (typeof v === 'string') return `'${v.replace(/'/g, "\\'")}'`;
+              if (v instanceof Date) return `'${v.toISOString()}'`;
+              return v;
+            }).join(', ');
+            
+            sqlDump += `INSERT INTO \`${tableName}\` (${columns}) VALUES (${values});\n`;
+          }
+          
+          sqlDump += `\n`;
+        }
+      }
+      
+      // Send as downloadable file
+      res.setHeader('Content-Type', 'application/sql');
+      res.setHeader('Content-Disposition', `attachment; filename="backup_${Date.now()}.sql"`);
+      res.send(sqlDump);
+      
+    } catch (error: any) {
+      console.error('Backup error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
   // tRPC API
   app.use(
     "/api/trpc",
