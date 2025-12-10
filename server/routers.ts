@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import * as dbAgenda from "./db_agenda";
 import { TRPCError } from "@trpc/server";
 import * as auth from "./authorization";
 import * as captcha from "./captcha";
@@ -1545,6 +1546,184 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await db.updateUserPermissions(input.userId, input.permissions);
         return { success: true };
+      }),
+  }),
+
+  // ========== AGENDA ==========
+  agenda: router({
+    // Listar eventos da agenda com filtros
+    list: protectedProcedure
+      .input(z.object({
+        companyId: z.string().optional(),
+        eventId: z.number().optional(),
+        year: z.number().optional(),
+        status: z.string().optional(),
+        state: z.string().optional(),
+        network: z.string().optional(),
+        classification: z.string().optional(),
+        shopping: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await dbAgenda.listAgenda(input || {});
+      }),
+
+    // Obter estatísticas da agenda
+    stats: protectedProcedure.query(async () => {
+      return await dbAgenda.getAgendaStats();
+    }),
+
+    // Buscar por ID
+    getById: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        const record = await dbAgenda.getAgendaById(input.id);
+        if (!record) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Registro não encontrado" });
+        }
+        return record;
+      }),
+
+    // Criar novo registro
+    create: protectedProcedure
+      .input(z.object({
+        company_id: z.string(),
+        event_id: z.number(),
+        year: z.number(),
+        period: z.string(),
+        status: z.string(),
+        shopping: z.string().optional(),
+        state: z.string().optional(),
+        network: z.string().optional(),
+        classification: z.string().optional(),
+        rent: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await dbAgenda.createAgenda(input);
+        return { id, success: true };
+      }),
+
+    // Atualizar registro
+    update: protectedProcedure
+      .input(z.object({
+        id: z.string(),
+        data: z.object({
+          company_id: z.string().optional(),
+          event_id: z.number().optional(),
+          year: z.number().optional(),
+          period: z.string().optional(),
+          status: z.string().optional(),
+          shopping: z.string().optional(),
+          state: z.string().optional(),
+          network: z.string().optional(),
+          classification: z.string().optional(),
+          rent: z.string().optional(),
+          notes: z.string().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        await dbAgenda.updateAgenda(input.id, input.data);
+        return { success: true };
+      }),
+
+    // Deletar registro
+    delete: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        await dbAgenda.deleteAgenda(input.id);
+        return { success: true };
+      }),
+
+    // Exportar dados
+    export: protectedProcedure.query(async () => {
+      return await dbAgenda.exportAgenda();
+    }),
+
+    // Importar planilha Excel
+    import: protectedProcedure
+      .input(z.object({
+        records: z.array(z.object({
+          EMPRESA: z.string(),
+          EVENTO: z.string(),
+          ANO: z.number(),
+          PERIODO: z.string(),
+          STATUS: z.string(),
+          SHOPPING: z.string().optional(),
+          UF: z.string().optional(),
+          REDE: z.string().optional(),
+          CLASSIFICACAO: z.string().optional(),
+          ALUGUEL: z.union([z.number(), z.string()]).optional(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        const results = {
+          success: [] as string[],
+          errors: [] as { line: number; error: string; data: any }[],
+        };
+
+        for (let i = 0; i < input.records.length; i++) {
+          const record = input.records[i];
+          const lineNumber = i + 2; // +2 porque linha 1 é cabeçalho
+
+          try {
+            // 1. Converter EMPRESA para company_id
+            let companyId = record.EMPRESA.toLowerCase().replace(/\s+/g, "");
+            
+            // 2. Buscar evento pelo nome
+            const event = await dbAgenda.findEventByName(record.EVENTO);
+            if (!event) {
+              results.errors.push({
+                line: lineNumber,
+                error: `Evento "${record.EVENTO}" não encontrado. Crie o evento em FINANCEIRO > Evento > Novo Evento`,
+                data: record,
+              });
+              continue;
+            }
+
+            // 3. Processar aluguel
+            let rent: string | undefined;
+            if (record.ALUGUEL) {
+              if (typeof record.ALUGUEL === "number") {
+                rent = record.ALUGUEL.toString();
+              } else {
+                // Remover formatação: "R$ 1.000,00" -> "1000.00"
+                rent = record.ALUGUEL
+                  .replace(/[^0-9,]/g, "")
+                  .replace(",", ".");
+              }
+            }
+
+            // 4. Criar registro
+            await dbAgenda.createAgenda({
+              company_id: companyId,
+              event_id: event.id,
+              year: record.ANO,
+              period: record.PERIODO,
+              status: record.STATUS,
+              shopping: record.SHOPPING,
+              state: record.UF,
+              network: record.REDE,
+              classification: record.CLASSIFICACAO,
+              rent,
+            });
+
+            results.success.push(`Linha ${lineNumber}: ${record.EVENTO} - ${record.PERIODO}`);
+          } catch (error: any) {
+            results.errors.push({
+              line: lineNumber,
+              error: error.message || "Erro desconhecido",
+              data: record,
+            });
+          }
+        }
+
+        return {
+          success: results.success.length > 0,
+          imported: results.success.length,
+          failed: results.errors.length,
+          total: input.records.length,
+          details: results,
+        };
       }),
   }),
 });
