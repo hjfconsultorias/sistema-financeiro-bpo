@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm install && pnpm build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "NODE_ENV": "production"
+  }
+}
